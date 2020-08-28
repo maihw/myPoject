@@ -18,4 +18,7 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index, name='index'),
 ]
+#urlpatterns 为路由映射到视图函数的控制列表，当服务器收到浏览器
+#发送过来的请求时，首先到这里检查是否有对应的视图函数。
