@@ -1,0 +1,80 @@
+创建 Web 项目
+接下来我们来学习创建属于我们自己的 Web 项目。
+
+执行命令 django-admin startproject 初始化一个 Django 项目，
+后面的参数为项目名称，我们这里的项目名称定为 myProject。
+执行 tree myProject 命令查看项目的目录结构
+$ django-admin startproject myProject
+$ ll
+$ tree myProject
+
+对主目录下的文件和目录依次说明：
+
+manage.py 项目的入口文件，在后面的实验中我们会大量使用
+          它来执行一些命令用来创建应用、启动项目、控制数据表迁移等。
+myProject 主目录下的同名子目录，为项目的核心目录，它里面包含配置
+          文件和管理应用的文件。
+myProject/__init__.py 每个子目录都会包含这样一个 __init__.py 文件，
+          它是一个空文件，在需要的时候会引入目录下的对象。
+myProject/settings.py 配置文件，里面包含对数据库的设置项、
+          CSRF Token 的设置项、模板的设置项等全部设置。
+myProject/urls.py 路由控制文件，处理客户端请求，分发到对应的视图函数
+          去处理。
+myProject/wsgi.py 处理请求和响应，我们很少去动它。
+
+在终端执行 cd myProject 命令进入到项目的主目录，然后执行如下命令创建
+一个名为 myApp 的应用，注意实验环境里不可以创建名为 test 的应用，
+某些情况下它与Python 模块冲突
+$ cd myProject
+$ python3 manage.py startapp myApp
+
+应用中的文件说明如下：
+
+myApp/admin.py 用于控制后台管理的文件，在后面的实验中会用到。
+myApp/apps.py 用于管理应用本身的文件，包括应用的名字如何命名，
+              默认就是 myApp 。
+myApp/__init__.py 空文件，前面已经介绍过。
+myApp/migrations 这是用于记录数据库变更信息的目录，Django 
+                 中自带的数据库版本控制功能就体现在这个目录，
+                 在学习数据存储时会详细介绍。
+myApp/models.py 创建映射类的文件，熟悉 Flask 的同学一定不陌生。
+myApp/tests.py 编写测试代码的文件。
+myApp/views.py 创建视图函数的文件，视图函数用于处理客户端发来的请求。
+
+配置文件
+
+创建一个应用后，该应用并未与项目产生联系，需要在配置文件中添加此应用。
+$ vim myProject/settings.py
+修改 INSTALLED_APPS 项，添加我们创建的应用名称 myApp
+
+启动项目
+我们的实验环境为 Web 环境，其实本质上就是一个在线集成工具，
+类似 VSCode。它内部没有浏览器，但提供了一个 8080 端口的 Web 服务。
+我们可以在启动项目之后，点击右侧工具栏的 “Web 服务”，
+会自动在你的浏览器上打开一个新标签来访问你的项目：
+
+新打开一个终端并输入命令：
+$ cd myProject
+$ python3 manage.py runserver 0:8080
+
+其中 manage.py 作为入口文件，它有很多选项提供各种各样的功能。
+runserver 为启动项目的选项，后面的 0:8080 为 0.0.0.0:8080 
+的简写，冒号前面为 IP 地址，后面为端口号。
+
+启动项目后，点击工具栏的“Web 服务”按钮，打开新的页面，
+会出现如下图所示的报错：
+这是因为我们的实验环境稍有些特殊，需要在配置文件中增加一项设置。
+
+打开另一个终端标签，进入项目的主目录 myProject，打开 
+myProject/settings.py 文件，修改 ALLOWED_HOSTS 这一项为
+上述划线字符（注意：每次打开内容可能不一样，每启动一次都需要修
+改一下该项内容）。它也是一个列表，在列表中添加报错中所示的 header 
+信息，也就是单引号中的内容
+
+同时，我们将欢迎页适配为中文，方便后续操作和阅读，
+将 LANGUATE_CODE 和 TIME_ZONE 修改如下：
+LANGUAGE_CODE = 'zh-hans'
+
+TIME_ZONE = 'Asia/Shanghai'
+
+修改并保存后，ctrl+c 关闭服务器并重新打开 Web 服务
