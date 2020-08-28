@@ -78,3 +78,91 @@ LANGUAGE_CODE = 'zh-hans'
 TIME_ZONE = 'Asia/Shanghai'
 
 修改并保存后，ctrl+c 关闭服务器并重新打开 Web 服务
+
+创建模型
+模型是真实数据的简明描述。它包含了存储的数据所必要的字段和行为。
+Django 遵循不要重复自己（DRY 原则）。它的目标是让你只需要定义
+数据模型，然后其它的东西你都不用关心，都会自动从模型生成。
+
+实验前，先进入到项目主目录：
+$ cd myProject
+
+在我们创建的图书馆应用中，需要创建一个模型 Book。Book 
+模型包括四个字段：书名、作者、出版社、出版日期。
+向 myApp/models.py 文件中写入如下代码：
+# myApp/models.py
+from django.db import models
+
+class Book(models.Model):
+    name = models.CharField(max_length=200)
+    author = models.CharField(max_length=100)
+    pub_house = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+从代码可以看出，模型是 django.db.models.Model 类的子类。每个
+模型有一些类变量，它们都表示模型里的一个数据库字段。
+
+每个字段都是 Field 类的实例。比如字符字段是 CharField，
+日期字段被表示为 DateTImeField。这将告诉 Django 每个字段要处
+理的数据类型。
+
+定义某些 Field 类实例需要参数。如上面的 max_length=100 中的 
+max_length。这个参数的用处不止于用来定义数据结构，也用于验证数据。
+
+激活模型
+通过前面的代码，Django 可以：
+
+为这个应用创建数据库 schema（生成 CREATE TABLE 语句）。
+创建可以与 Book 对象进行交互的 Python 数据库 API。
+
+为了实现上述功能，我们首先要将 myApp 应用安装到我们项目中。
+
+因为 MyappConfig 类写在文件 myApp/apps.py 中，所以它的路径为 
+myApp.apps.MyappConfig。
+
+在设置文件中添加路径：
+# myProject/settings.py
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # 'myApp', 这一注释掉，不注释掉会因重复而报错
+    'myApp.apps.MyappConfig',
+]
+
+现在你的 Django 项目会包含 myApp 应用。 运行下面的命令：
+$ python3 manage.py makemigrations myApp
+
+通过运行 makemigrations 命令，Django 会检测你对模型文件的修改，
+并且把修改的部分储存为一次迁移。
+
+让我们看看迁移命令会执行哪些 SQL 语句。
+$ python3 manage.py sqlmigrate myApp 0001
+
+现在运行 migrate 命令，在数据库里创建新定义的模型的数据表：
+$ python3 manage.py migrate
+
+使用 API
+现在尝试一下 Django 为我们创建的各种 API：
+$ python3 manage.py shell
+
+使用这个命令而不是简单的使用 "Python" 是因为 manage.py 
+会设置 DJANGO_SETTINGS_MODULE 环境变量，这个变量会让 Django 
+根据 myProject/settings.py 文件来设置 Python 包的导入路径。
+
+In [1]: from myApp.models import Book
+In [2]: Book.objects.all()   # 获取 Book 所有对象
+Out[1]: <QuerySet []>
+In [3]: from django.utils import timezone
+In [4]: b = Book(name='Business', author='Tom', 
+pub_house='First Press', pub_date=timezone.now())    #创建
+In [5]: b.save() #保存
+In [6]: b.id
+Out[6]: 1
+In [7]: b.name
+Out[7]: 'Business'
+In [8]: b.pub_date
+Out[8]: datetime.datetime(2020, 4, 27, 7, 37, 59, 123686, tzinfo=<UTC>)
