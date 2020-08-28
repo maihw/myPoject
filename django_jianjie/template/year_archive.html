@@ -1,0 +1,13 @@
+{% block title %}Books for {{ year }}{% endblock %}
+
+{{% block content %}}
+<h1>Articles for {{years}}</h1>
+
+{% for book in book_list %}
+    <p>{{ book.name }}</p>
+    <p>Published {{ book.pub_date|date:"F j, Y" }}</p>
+{% endfor %}
+{% end block %}
+
+<!--year_archive.html 是 html 模板。使用带基本逻辑声明的模板语言，
+如 {% for book in book_list %}，它试图将函数返回的结果显示在网页上。-->
