@@ -166,3 +166,77 @@ In [7]: b.name
 Out[7]: 'Business'
 In [8]: b.pub_date
 Out[8]: datetime.datetime(2020, 4, 27, 7, 37, 59, 123686, tzinfo=<UTC>)
+
+创建模板
+首先，在你的 myProject/myApp 目录里创建一个 templates 目录。Django 
+将会在这个目录里查找模板文件。
+
+在 myProject/myProject/settings.py 文件中的 TEMPLATES 配置项描述
+了 Django 如何载入和渲染模板。默认的设置文件设置了 DjangoTemplates 
+后端，并设置 APP_DIRS = True。这一选项将会让 DjangoTemplates 在每
+个 INSTALLED_APPS 文件夹中寻找 templates 子目录。
+
+新建模板文件 myApp/templates/myApp/detail.html，并向其中写入如下代码：
+<!--myApp/templates/myApp/detail.html-->
+<h1>Book List</h1>
+<table>
+  <tr>
+    <td>书名</td>
+    <td>作者</td>
+    <td>出版社</td>
+    <td>出版时间</td>
+  </tr>
+  {% for book in book_list.all %}
+  <tr>
+    <td>{{ book.name }}</td>
+    <td>{{ book.author }}</td>
+    <td>{{ book.pub_house }}</td>
+    <td>{{ book.pub_date }}</td>
+  </tr>
+  {% endfor %}
+</table>
+模板统一使用点符号 . 来访问变量的属性。在示例 {{ book.name }} 中，
+首先 Django 尝试对 book 对象使用字典查找（也就是使用 obj.get(str) 
+操作），如果失败了就尝试属性查找（也就是 obj.str 操作），结果是成功
+了。如果这一操作也失败的话，将会尝试列表查找（也就是 obj[int] 操作）。
+
+在 {% for ... in ... %} 循环中发生的函数调用：book_list.all 被解释
+为 Python 代码 book_list.objects.all()，将会返回一个可迭代的 Book 
+对象，这一对象可以在 {% for ... in ... %} 标签内部使用。
+
+创建视图
+现在我们要创建视图来返回图书列表：
+
+# myApp/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from myApp.models import Book
+
+def detail(request):
+    book_list = Book.objects.order_by('-pub_date')[:5]
+    context = {'book_list': book_list}
+    return render(request, 'myApp/detail.html', context)
+
+在此视图函数 detail 中，首先将数据库的 Book 列表按照 pub_date 
+时间来排序，存储到变量 book_list 中。
+
+“载入模板，填充上下文，再返回由它生成的 HttpResponse 对象”是一
+个非常常用的操作流程。于是 Django 提供了一个快捷函数 render()。
+
+render() 函数把 request 对象作为它的第一个参数，模板作为第二个
+参数，字典作为它的可选的第三个参数。它返回给定模板呈现的给定文本
+的一个 HttpResponse 对象。
+
+在这里，context 信息将会返回到模板 myApp/detail.html。
+
+绑定链接
+将新视图添加进 myProject.urls 模块里：
+# myProject/urls.py
+from django.contrib import admin
+from django.urls import path
+from myApp import views
+
+urlpatterns = [
+    # path('admin/', admin.site.urls),
+    path('', views.detail, name='detail'),
+]
