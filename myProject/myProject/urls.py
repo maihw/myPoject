@@ -16,9 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+app_name = 'myApp'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.detail, name='detail'),
+    path('addBook/', views.addBook, name='addBook'),
+    path('delBook/<int:book_id>', views.deleteBook, name='delBook'),
 ]
 #urlpatterns 为路由映射到视图函数的控制列表，当服务器收到浏览器
 #发送过来的请求时，首先到这里检查是否有对应的视图函数。
